@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Strength Checker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        #password {
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        #result {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Password Strength Checker</h1>
+        <form action="/classify-password" method="post" onsubmit="checkPasswordStrength(event)">
+            <input type="password" id="password" name="password" placeholder="Enter your password">
+            <br>
+            <input type="submit" value="Check Strength">
+        </form>
+        <div id="result"></div> <!-- Result container -->
+    </div>
+    <script>
+        function checkPasswordStrength(event) {
+            event.preventDefault(); // Prevent form submission
+    
+            // Get password value from the input field
+            var password = document.getElementById('password').value;
+    
+            // Send password to the backend for classification
+            fetch('/classify-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({password: password})
+            })
+            .then(response => response.json())
+            .then(data => {
+                var resultContainer = document.getElementById('result');
+                if (data.strength) {
+                    var message = '';
+                    var color = '';
+                    switch (data.strength) {
+                        case 'Strong':
+                            message = 'Strong Password';
+                            color = 'green';
+                            break;
+                        case 'Medium':
+                            message = 'Medium Password';
+                            color = 'orange';
+                            break;
+                        case 'Weak':
+                            message = 'Weak Password';
+                            color = 'red';
+                            break;
+                        default:
+                            message = 'Error determining password strength';
+                            color = 'black';
+                    }
+                    resultContainer.innerHTML = `<p style="color: ${color};">${message}</p>`;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                var resultContainer = document.getElementById('result');
+                resultContainer.innerHTML = '<p style="color: black;">Error checking password strength.</p>';
+            });
+        }
+    </script>
+    
+    
+
+</body>
+</html>
